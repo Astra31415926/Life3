@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>taina lab 01 — клітинний орнамент</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d0a08;--panel:#15100b;--panel2:#1d1610;--gold:#c9a876;--gold-hot:#e8c890;--gold-dim:#8f7451;
+--parchment:#ede3d0;--muted:#94836a;--line:rgba(201,168,118,.22);--sp-g:#58d668;
+--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--parchment);font-family:var(--sans);line-height:1.5;
+background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(201,168,118,.07),transparent);min-height:100vh}
+a{color:var(--gold);text-decoration:none}a:hover{color:var(--gold-hot)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+header{border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:14px;height:56px}
+.mark{font-family:var(--mono);font-weight:700;font-size:18px;letter-spacing:.06em;color:var(--parchment);display:flex;align-items:center;gap:7px}
+.mark::after{content:'';width:7px;height:7px;background:var(--gold);display:inline-block}
+.lab-tag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--gold);border:1px solid var(--line);border-radius:6px;padding:3px 9px;text-transform:uppercase}
+.back{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.head{padding:26px 0 6px}
+h1{font-family:var(--mono);font-size:clamp(19px,2.6vw,26px);font-weight:700;margin-bottom:6px}
+.sub{color:var(--muted);font-size:14px;max-width:72ch;margin-bottom:20px}
+.lab{display:grid;grid-template-columns:270px 1fr;gap:20px;padding-bottom:60px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;align-self:start;display:flex;flex-direction:column;gap:14px}
+label{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--gold-dim);text-transform:uppercase;display:block;margin-bottom:6px}
+input[type=text],select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--parchment);font-family:var(--mono);font-size:15px;padding:9px 12px;outline:none}
+input[type=text]:focus,select:focus{border-color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.rowval{display:flex;justify-content:space-between;align-items:baseline}
+.rowval span{font-family:var(--mono);font-size:11.5px;color:var(--gold)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:var(--mono);font-size:12.5px;font-weight:600;padding:9px 13px;border-radius:8px;border:1px solid var(--line);cursor:pointer;background:transparent;color:var(--muted);transition:.15s}
+button:hover{color:var(--gold-hot);border-color:var(--gold-dim)}
+button.gold{background:linear-gradient(160deg,rgba(201,168,118,.2),rgba(201,168,118,.08));border-color:rgba(201,168,118,.55);color:var(--gold-hot)}
+button.gold:hover{border-color:var(--gold-hot);box-shadow:0 0 18px rgba(201,168,118,.2)}
+button:focus-visible{outline:2px solid var(--gold-hot);outline-offset:2px}
+.stat{font-family:var(--mono);font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.stat b{color:var(--gold);font-weight:600}
+.warn{color:#e5a053;display:none}
+.hint{font-size:11.5px;color:var(--gold-dim);font-family:var(--mono)}
+.board{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:center}
+canvas{width:100%;max-width:640px;height:auto;image-rendering:pixelated;border-radius:6px;background:#0a0806;cursor:crosshair;touch-action:none}
+@media(max-width:820px){.lab{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <span class="mark">taina</span><span class="lab-tag">lab 01</span>
+  <a class="back" href="https://astra31415926.github.io/taina/">← на сайт</a>
+</div></header>
+
+<main class="wrap">
+  <div class="head">
+    <h1>Клітинний орнамент</h1>
+    <p class="sub">Текст стає посівом для гри «Життя» Конвея: кожна літера — початкові живі клітини. Симетричний посів дає вічно симетричну еволюцію — живі мандали. Клікни по полю, щоб перемкнути клітинку.</p>
+  </div>
+
+  <div class="lab">
+    <div class="panel">
+      <div>
+        <label for="txt">Текст · до 12 символів</label>
+        <input type="text" id="txt" maxlength="12" value="ТАЇНА" autocomplete="off" spellcheck="false">
+      </div>
+      <div>
+        <label for="sym">Симетрія посіву</label>
+        <select id="sym">
+          <option value="8" selected>Октант ×8 · орнамент</option>
+          <option value="4">Дзеркала ×4</option>
+          <option value="1">Рядок ×1</option>
+        </select>
+      </div>
+      <div>
+        <div class="rowval"><label for="size">Поле</label><span id="sizev">141×141</span></div>
+        <input type="range" id="size" min="25" max="255" step="2" value="141">
+      </div>
+      <div>
+        <label for="fscale">Масштаб шрифту</label>
+        <select id="fscale"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option></select>
+      </div>
+      <div>
+        <label for="rule">Правила</label>
+        <select id="rule">
+          <option value="B3/S23" selected>Conway · B3/S23</option>
+          <option value="B36/S23">HighLife · B36/S23</option>
+          <option value="B2/S">Seeds · B2/S</option>
+          <option value="B3678/S34678">День і ніч</option>
+          <option value="B3/S12345">Лабіринт · B3/S12345</option>
+        </select>
+      </div>
+      <div>
+        <div class="rowval"><label for="speed">Швидкість</label><span id="speedv">12 пок/с</span></div>
+        <input type="range" id="speed" min="1" max="60" value="12">
+      </div>
+      <div class="btns">
+        <button class="gold" id="play">▶ Старт</button>
+        <button id="step">⏭ Крок</button>
+        <button id="reset">↺ Посів</button>
+        <button id="clear">✕ Очистити</button>
+        <button id="save">⤓ PNG</button>
+      </div>
+      <div class="stat">
+        <span>Покоління: <b id="gen">0</b> · Живих: <b id="alive">0</b></span>
+        <span class="warn" id="warn">Текст не вміщується — збільш поле або зменш масштаб</span>
+        <span class="hint">Символи заповнюють трикутник від центру, як мозаїка · клік по полю — перемкнути клітинку</span>
+      </div>
+    </div>
+    <div class="board"><canvas id="cv"></canvas></div>
+  </div>
+</main>
+
+<script>
+/* ---------- власний піксельний шрифт 5×7 (авторський, вільний) ---------- */
+const G=(s)=>s.split(' ');
+const FONT={
+'A':G('01110 10001 10001 11111 10001 10001 10001'),
+'B':G('11110 10001 10001 11110 10001 10001 11110'),
+'C':G('01110 10001 10000 10000 10000 10001 01110'),
+'D':G('11100 10010 10001 10001 10001 10010 11100'),
+'E':G('11111 10000 10000 11110 10000 10000 11111'),
+'F':G('11111 10000 10000 11110 10000 10000 10000'),
+'G':G('01110 10001 10000 10111 10001 10001 01111'),
+'H':G('10001 10001 10001 11111 10001 10001 10001'),
+'I':G('01110 00100 00100 00100 00100 00100 01110'),
+'J':G('00111 00010 00010 00010 00010 10010 01100'),
+'K':G('10001 10010 10100 11000 10100 10010 10001'),
+'L':G('10000 10000 10000 10000 10000 10000 11111'),
+'M':G('10001 11011 10101 10101 10001 10001 10001'),
+'N':G('10001 11001 10101 10011 10001 10001 10001'),
+'O':G('01110 10001 10001 10001 10001 10001 01110'),
+'P':G('11110 10001 10001 11110 10000 10000 10000'),
+'Q':G('01110 10001 10001 10001 10101 10010 01101'),
+'R':G('11110 10001 10001 11110 10100 10010 10001'),
+'S':G('01111 10000 10000 01110 00001 00001 11110'),
+'T':G('11111 00100 00100 00100 00100 00100 00100'),
+'U':G('10001 10001 10001 10001 10001 10001 01110'),
+'V':G('10001 10001 10001 10001 10001 01010 00100'),
+'W':G('10001 10001 10001 10101 10101 11011 10001'),
+'X':G('10001 01010 00100 00100 00100 01010 10001'),
+'Y':G('10001 10001 01010 00100 00100 00100 00100'),
+'Z':G('11111 00001 00010 00100 01000 10000 11111'),
+'0':G('01110 10001 10011 10101 11001 10001 01110'),
+'1':G('00100 01100 00100 00100 00100 00100 01110'),
+'2':G('01110 10001 00001 00110 01000 10000 11111'),
+'3':G('11110 00001 00001 01110 00001 00001 11110'),
+'4':G('00010 00110 01010 10010 11111 00010 00010'),
+'5':G('11111 10000 11110 00001 00001 10001 01110'),
+'6':G('00110 01000 10000 11110 10001 10001 01110'),
+'7':G('11111 00001 00010 00100 01000 01000 01000'),
+'8':G('01110 10001 10001 01110 10001 10001 01110'),
+'9':G('01110 10001 10001 01111 00001 00010 01100'),
+'А':G('01110 10001 10001 11111 10001 10001 10001'),
+'Б':G('11111 10000 10000 11110 10001 10001 11110'),
+'В':G('11110 10001 10001 11110 10001 10001 11110'),
+'Г':G('11111 10000 10000 10000 10000 10000 10000'),
+'Ґ':G('00001 11111 10000 10000 10000 10000 10000'),
+'Д':G('00110 01010 01010 01010 01010 11111 10001'),
+'Е':G('11111 10000 10000 11110 10000 10000 11111'),
+'Є':G('01110 10001 10000 11100 10000 10001 01110'),
+'Ж':G('10101 10101 01110 00100 01110 10101 10101'),
+'З':G('01110 10001 00001 00110 00001 10001 01110'),
+'И':G('10001 10001 10011 10101 11001 10001 10001'),
+'І':G('01110 00100 00100 00100 00100 00100 01110'),
+'Ї':G('01010 00000 01110 00100 00100 00100 01110'),
+'Й':G('01110 00000 10001 10011 10101 11001 10001'),
+'К':G('10001 10010 10100 11000 10100 10010 10001'),
+'Л':G('00111 01001 01001 01001 01001 01001 10001'),
+'М':G('10001 11011 10101 10101 10001 10001 10001'),
+'Н':G('10001 10001 10001 11111 10001 10001 10001'),
+'О':G('01110 10001 10001 10001 10001 10001 01110'),
+'П':G('11111 10001 10001 10001 10001 10001 10001'),
+'Р':G('11110 10001 10001 11110 10000 10000 10000'),
+'С':G('01110 10001 10000 10000 10000 10001 01110'),
+'Т':G('11111 00100 00100 00100 00100 00100 00100'),
+'У':G('10001 10001 10001 01111 00001 10001 01110'),
+'Ф':G('00100 01110 10101 10101 10101 01110 00100'),
+'Х':G('10001 01010 00100 00100 00100 01010 10001'),
+'Ц':G('10010 10010 10010 10010 10010 11111 00001'),
+'Ч':G('10001 10001 10001 01111 00001 00001 00001'),
+'Ш':G('10101 10101 10101 10101 10101 10101 11111'),
+'Щ':G('10101 10101 10101 10101 10101 11111 00001'),
+'Ь':G('10000 10000 10000 11110 10001 10001 11110'),
+'Ю':G('10010 10101 10101 11101 10101 10101 10010'),
+'Я':G('01111 10001 10001 01111 00101 01001 10001'),
+'Э':G('11110 00001 00001 01111 00001 00001 11110'),
+'Ы':G('10001 10001 10001 11101 10101 10101 11101'),
+'Ъ':G('11000 01000 01000 01110 01001 01001 01110'),
+' ':G('00000 00000 00000 00000 00000 00000 00000'),
+'-':G('00000 00000 00000 01110 00000 00000 00000'),
+'.':G('00000 00000 00000 00000 00000 00000 00100'),
+'!':G('00100 00100 00100 00100 00100 00000 00100'),
+'?':G('01110 10001 00001 00110 00100 00000 00100'),
+'+':G('00000 00100 00100 11111 00100 00100 00000'),
+'♥':G('01010 11111 11111 01110 00100 00000 00000')
+};
+
+/* ---------- стан ---------- */
+let N=140, cells, next, age, gen=0, running=false, acc=0, last=0;
+let born=new Set([3]), survive=new Set([2,3]);
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const $=id=>document.getElementById(id);
+
+function alloc(){cells=new Uint8Array(N*N);next=new Uint8Array(N*N);age=new Uint16Array(N*N)}
+function parseRule(s){const m=s.split('/');born=new Set([...m[0].slice(1)].map(Number));survive=new Set([...(m[1]||'S').slice(1)].map(Number))}
+
+/* ---------- посів ---------- */
+function normalize(t){
+  return [...t.toUpperCase().replaceAll('Ё','Е')].filter(ch=>FONT[ch]).slice(0,12);
+}
+/* сектор-сетка 7×7: список кандидатних клітинок від центру до краю, без накладань */
+function sectorCells(kind,cellSize,N){
+  const c=(N-1)/2, list=[];
+  if(kind==='oct'){
+    for(let gx=0;;gx++){
+      const x0=c+gx*cellSize;
+      if(x0+cellSize-1>N-1)break;
+      for(let gy=0;gy<=gx;gy++){
+        const y0=c+gy*cellSize;
+        if(y0+cellSize-1>N-1)break;
+        list.push({x0,y0,gx,gy});
+      }
+    }
+  }else{ // quad
+    for(let gx=0;;gx++){
+      const x0=c+gx*cellSize;
+      if(x0+cellSize-1>N-1)break;
+      for(let gy=0;;gy++){
+        const y0=c+gy*cellSize;
+        if(y0+cellSize-1>N-1)break;
+        list.push({x0,y0,gx,gy});
+      }
+    }
+  }
+  list.forEach(p=>p.d=p.gx*p.gx+p.gy*p.gy);
+  list.sort((a,b)=>a.d-b.d);
+  return list;
+}
+function glyphPixels(ch,scale,x0,y0){
+  const g=FONT[ch], ox=scale, oy=0, pts=[];
+  for(let r=0;r<7;r++)for(let col=0;col<5;col++)if(g[r][col]==='1')
+    for(let dy=0;dy<scale;dy++)for(let dx=0;dx<scale;dx++)
+      pts.push([x0+ox+col*scale+dx, y0+oy+r*scale+dy]);
+  return pts;
+}
+function seed(){
+  running=false;$('play').textContent='▶ Старт';
+  gen=0;alloc();
+  const chars=normalize($('txt').value);
+  const scale=+$('fscale').value, sym=$('sym').value;
+  const cellSize=7*scale, c=(N-1)/2;
+  const put=(x,y)=>{if(x>=0&&y>=0&&x<N&&y<N)cells[y*N+x]=1};
+  let clipped=false;
+  if(sym==='1'){
+    const w=chars.length?chars.length*6*scale-scale:0, h=7*scale;
+    const x0=Math.round((N-w)/2), y0=Math.round((N-h)/2);
+    let cx=x0;
+    for(const ch of chars){for(const [x,y] of glyphPixels(ch,scale,cx,y0))put(x,y);cx+=6*scale;}
+    clipped = w>N || h>N;
+  }else{
+    const kind = sym==='8' ? 'oct':'quad';
+    const cellsList = sectorCells(kind,cellSize,N);
+    if(chars.length>cellsList.length)clipped=true;
+    chars.forEach((ch,i)=>{
+      if(i>=cellsList.length)return;
+      const {x0,y0}=cellsList[i];
+      for(const [x,y] of glyphPixels(ch,scale,x0,y0)){
+        const dx=x-c, dy=y-c;
+        const o = kind==='oct'
+          ? [[dx,dy],[-dx,dy],[dx,-dy],[-dx,-dy],[dy,dx],[-dy,dx],[dy,-dx],[-dy,-dx]]
+          : [[dx,dy],[-dx,dy],[dx,-dy],[-dx,-dy]];
+        for(const [a,b] of o)put(Math.round(c+a),Math.round(c+b));
+      }
+    });
+  }
+  for(let i=0;i<N*N;i++)age[i]=cells[i];
+  $('warn').style.display=clipped?'block':'none';
+  fit();draw();stats();
+}
+
+/* ---------- еволюція ---------- */
+function step(){
+  for(let y=0;y<N;y++){
+    const up=y>0,dn=y<N-1;
+    for(let x=0;x<N;x++){
+      let n=0;const lf=x>0,rt=x<N-1,i=y*N+x;
+      if(up){if(lf)n+=cells[i-N-1];n+=cells[i-N];if(rt)n+=cells[i-N+1]}
+      if(lf)n+=cells[i-1];if(rt)n+=cells[i+1];
+      if(dn){if(lf)n+=cells[i+N-1];n+=cells[i+N];if(rt)n+=cells[i+N+1]}
+      const a=cells[i]?survive.has(n):born.has(n);
+      next[i]=a?1:0;
+      age[i]=a?Math.min(age[i]+1,999):0;
+    }
+  }
+  [cells,next]=[next,cells];gen++;
+}
+
+/* ---------- рендер ---------- */
+let K=4;
+function fit(){K=Math.max(2,Math.floor(640/N));cv.width=cv.height=N*K}
+function draw(){
+  ctx.fillStyle='#0a0806';ctx.fillRect(0,0,cv.width,cv.height);
+  const gap=K>=4?1:0;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const i=y*N+x;if(!cells[i])continue;
+    const a=age[i];
+    ctx.fillStyle=a<=2?'#f0d8a8':a<=15?'#c9a876':'#8f7451';
+    ctx.fillRect(x*K,y*K,K-gap,K-gap);
+  }
+}
+function stats(){
+  let s=0;for(let i=0;i<N*N;i++)s+=cells[i];
+  $('gen').textContent=gen;$('alive').textContent=s;
+}
+
+/* ---------- цикл ---------- */
+function loop(t){
+  requestAnimationFrame(loop);
+  if(!running)return;
+  const spd=+$('speed').value, dt=(t-last)/1000;last=t;acc+=dt;
+  const per=1/spd;let done=0;
+  while(acc>per&&done<10){step();acc-=per;done++}
+  if(done){draw();stats()}
+}
+requestAnimationFrame(t=>{last=t;loop(t)});
+
+/* ---------- керування ---------- */
+$('play').onclick=()=>{running=!running;$('play').textContent=running?'⏸ Пауза':'▶ Старт'};
+$('step').onclick=()=>{running=false;$('play').textContent='▶ Старт';step();draw();stats()};
+$('reset').onclick=seed;
+$('clear').onclick=()=>{running=false;$('play').textContent='▶ Старт';gen=0;alloc();draw();stats()};
+$('save').onclick=()=>{
+  const name='taina-lab-'+(normalize($('txt').value).join('')||'empty')+'-g'+gen+'.png';
+  cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();URL.revokeObjectURL(a.href)});
+};
+$('txt').oninput=seed;
+$('sym').onchange=seed;
+$('fscale').onchange=seed;
+$('rule').onchange=e=>parseRule(e.target.value);
+$('size').oninput=e=>{$('sizev').textContent=e.target.value+'×'+e.target.value};
+$('size').onchange=e=>{N=+e.target.value;seed()};
+$('speed').oninput=e=>{$('speedv').textContent=e.target.value+' пок/с'};
+
+/* клік — перемкнути стан клітинки на протилежний */
+let painting=false, lastIdx=-1;
+function cellAt(e){
+  const r=cv.getBoundingClientRect();
+  const x=Math.floor((e.clientX-r.left)/r.width*N), y=Math.floor((e.clientY-r.top)/r.height*N);
+  return (x>=0&&y>=0&&x<N&&y<N)?y*N+x:-1;
+}
+cv.addEventListener('pointerdown',e=>{painting=true;lastIdx=-1;toggle(e);cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(painting)toggle(e)});
+cv.addEventListener('pointerup',()=>{painting=false;lastIdx=-1});
+function toggle(e){
+  const i=cellAt(e);if(i<0||i===lastIdx)return;
+  lastIdx=i;
+  cells[i]=cells[i]?0:1;age[i]=cells[i];
+  draw();stats();
+}
+
+parseRule('B3/S23');
+seed();
+</script>
+</body>
+</html>
